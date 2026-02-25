@@ -1,0 +1,54 @@
+@import './fonts.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-void: #080B12;
+  --bg-surface: #0D1117;
+  --bg-elevated: #161B24;
+  --bg-border: #1E2733;
+  --text-primary: #E8EDF5;
+  --text-secondary: #8B9BB4;
+  --text-muted: #4A5568;
+  --accent-cyan: #00D4FF;
+  --accent-cyan-dim: rgba(0, 212, 255, 0.13);
+  --threat-critical: #FF3B5C;
+  --threat-high: #FF6B35;
+  --threat-medium: #FFB800;
+  --threat-low: #00D4FF;
+  --threat-safe: #00FF88;
+  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.15);
+  --glow-red: 0 0 20px rgba(255, 59, 92, 0.2);
+}
+
+body {
+  margin: 0;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

@@ -1,0 +1,30 @@
+{
+  "name": "ghostnet",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.30.1",
+  "scripts": {
+    "dev": "pnpm --parallel -r run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "db:migrate": "pnpm --filter @ghostnet/api run db:migrate",
+    "db:seed": "pnpm --filter @ghostnet/api run db:seed",
+    "db:studio": "pnpm --filter @ghostnet/api run db:studio",
+    "clean": "pnpm -r exec rm -rf dist node_modules"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "bcrypt",
+      "esbuild",
+      "msgpackr-extract",
+      "prisma"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

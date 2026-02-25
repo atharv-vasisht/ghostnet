@@ -1,0 +1,60 @@
+# Development overrides: mount source, use tsx watch instead of built artifacts
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    command: sh -c "corepack enable && corepack prepare pnpm@10 --activate && cd /app && pnpm install && pnpm --filter @ghostnet/shared run build && cd apps/api && npx prisma generate && tsx watch src/server.ts"
+    volumes:
+      - ../:/app
+      - /app/node_modules
+      - /app/apps/api/node_modules
+    environment:
+      DATABASE_URL: postgresql://ghostnet:ghostnet_dev@postgres:5432/ghostnet
+      REDIS_URL: redis://redis:6379
+
+  deception:
+    build:
+      context: ..
+      dockerfile: apps/deception/Dockerfile
+    command: sh -c "corepack enable && corepack prepare pnpm@10 --activate && cd /app && pnpm install && pnpm --filter @ghostnet/shared run build && cd apps/deception && tsx watch src/server.ts"
+    volumes:
+      - ../:/app
+      - /app/node_modules
+      - /app/apps/deception/node_modules
+    environment:
+      REDIS_URL: redis://redis:6379
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+
+  worker:
+    build:
+      context: ..
+      dockerfile: apps/worker/Dockerfile
+    command: sh -c "corepack enable && corepack prepare pnpm@10 --activate && cd /app && pnpm install && pnpm --filter @ghostnet/shared run build && cd apps/api && npx prisma generate && cd ../worker && tsx watch src/worker.ts"
+    volumes:
+      - ../:/app
+      - /app/node_modules
+      - /app/apps/worker/node_modules
+      - /app/apps/api/node_modules
+    environment:
+      DATABASE_URL: postgresql://ghostnet:ghostnet_dev@postgres:5432/ghostnet
+      REDIS_URL: redis://redis:6379
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    # Dev: run Vite dev server instead of nginx
+    image: node:20-alpine
+    command: sh -c "corepack enable && corepack prepare pnpm@10 --activate && cd /app && pnpm install && pnpm --filter @ghostnet/shared run build && pnpm --filter @ghostnet/web run dev"
+    volumes:
+      - ../:/app
+      - /app/node_modules
+      - /app/apps/web/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_PROXY_TARGET: http://api:3000
+    depends_on:
+      - api

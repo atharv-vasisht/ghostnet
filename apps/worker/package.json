@@ -1,0 +1,29 @@
+{
+  "name": "@ghostnet/worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/worker.ts",
+    "build": "prisma generate && tsc",
+    "start": "node dist/worker.js",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate"
+  },
+  "prisma": {
+    "schema": "../api/prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@ghostnet/shared": "workspace:*",
+    "@prisma/client": "^6.4.1",
+    "bullmq": "^5.34.8",
+    "ioredis": "^5.4.2",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "prisma": "^6.4.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

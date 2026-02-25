@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id              String   @id @default(uuid())
+  name            String
+  slug            String   @unique
+  plan            Plan     @default(TRIAL)
+  isDemo          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  fakeCompanyName   String @default("Acme Corp")
+  fakeCompanyDomain String @default("acme-internal.io")
+  fakeAwsAccountId  String @default("847291038475")
+  deceptionSeed     String @default("ghostnet2024")
+
+  users           User[]
+  sessions        AgentSession[]
+  alertRules      AlertRule[]
+  invites         Invite[]
+  deceptionConfig DeceptionConfig?
+}
+
+enum Plan {
+  TRIAL
+  STARTER
+  ENTERPRISE
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         Role      @default(ANALYST)
+  orgId        String
+  org          Organization @relation(fields: [orgId], references: [id])
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+
+  refreshTokens RefreshToken[]
+}
+
+enum Role {
+  ADMIN
+  ANALYST
+  VIEWER
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Invite {
+  id         String    @id @default(uuid())
+  email      String
+  role       Role
+  token      String    @unique
+  orgId      String
+  org        Organization @relation(fields: [orgId], references: [id])
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+model DeceptionConfig {
+  id               String   @id @default(uuid())
+  orgId            String   @unique
+  org              Organization @relation(fields: [orgId], references: [id])
+
+  iamEnabled       Boolean @default(true)
+  oauthEnabled     Boolean @default(true)
+  apiEnabled       Boolean @default(true)
+  secretsEnabled   Boolean @default(true)
+  s3Enabled        Boolean @default(true)
+  discoveryEnabled Boolean @default(true)
+
+  lureDepth        Int     @default(3)
+  rateLimitEnabled Boolean @default(true)
+
+  updatedAt        DateTime @updatedAt
+}
+
+model AgentSession {
+  id              String        @id @default(uuid())
+  orgId           String
+  org             Organization  @relation(fields: [orgId], references: [id])
+
+  sourceIp        String
+  userAgent       String
+  firstSeenAt     DateTime      @default(now())
+  lastSeenAt      DateTime      @updatedAt
+  status          SessionStatus @default(ACTIVE)
+
+  eventCount      Int           @default(0)
+  servicesTouched String[]
+  riskScore       Int           @default(0)
+  riskLevel       RiskLevel     @default(LOW)
+  depthScore      Int           @default(0)
+
+  inferredGoal    String?
+  goalConfidence  Int           @default(0)
+  believedAssets  Json          @default("[]")
+  explorationPath String[]
+
+  events          AgentEvent[]
+  alerts          Alert[]
+
+  @@index([orgId, firstSeenAt])
+  @@index([orgId, riskLevel])
+}
+
+enum SessionStatus {
+  ACTIVE
+  IDLE
+  CLOSED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model AgentEvent {
+  id              String       @id @default(uuid())
+  sessionId       String
+  session         AgentSession @relation(fields: [sessionId], references: [id])
+  orgId           String
+
+  timestamp       DateTime     @default(now())
+  sourceIp        String
+  userAgent       String
+  targetService   String
+  action          String
+
+  requestHeaders  Json
+  requestBody     Json?
+  queryParams     Json
+  responseCode    Int
+  responseBody    Json?
+  durationMs      Int
+
+  tags            String[]
+
+  @@index([sessionId, timestamp])
+  @@index([orgId, timestamp])
+}
+
+model AlertRule {
+  id          String       @id @default(uuid())
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id])
+  name        String
+  description String
+  enabled     Boolean      @default(true)
+
+  trigger     AlertTrigger
+  threshold   Int?
+  services    String[]
+
+  notifyInApp  Boolean @default(true)
+  notifyEmail  Boolean @default(false)
+  notifySlack  Boolean @default(false)
+  slackWebhook String?
+  webhookUrl   String?
+
+  alerts      Alert[]
+  createdAt   DateTime @default(now())
+}
+
+enum AlertTrigger {
+  DEPTH_THRESHOLD
+  CREDENTIAL_ACCESS
+  BULK_EXFILTRATION
+  PERSISTENCE_ATTEMPT
+  DEEP_PROBE
+  FIRST_CONTACT
+}
+
+model Alert {
+  id             String       @id @default(uuid())
+  orgId          String
+  ruleId         String
+  rule           AlertRule    @relation(fields: [ruleId], references: [id])
+  sessionId      String
+  session        AgentSession @relation(fields: [sessionId], references: [id])
+
+  title          String
+  description    String
+  severity       RiskLevel
+  acknowledged   Boolean      @default(false)
+  acknowledgedAt DateTime?
+
+  createdAt      DateTime     @default(now())
+
+  @@index([orgId, createdAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}

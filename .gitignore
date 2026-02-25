@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+.vscode/
+.idea/
+*.tsbuildinfo
+coverage/
+.turbo/
+
+# Prisma
+apps/api/prisma/*.db
+
+# Vite
+apps/web/dist/
+
+# Docker
+postgres_data/
+redis_data/
+minio_data/
