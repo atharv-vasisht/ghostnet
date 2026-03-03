@@ -58,9 +58,16 @@ const app = Fastify({
   trustProxy: true,
 });
 
-// Per-request state — both are replaced in onRequest before any handler runs
+// Per-request state — use getter/setter for reference types (Fastify 5 requirement)
 app.decorateRequest('captureStart', 0);
-app.decorateRequest('deceptionTags', []);
+app.decorateRequest('deceptionTags', {
+  getter() {
+    return (this as FastifyRequest & { _deceptionTags?: string[] })._deceptionTags ?? [];
+  },
+  setter(this: FastifyRequest & { _deceptionTags?: string[] }, value: string[]) {
+    this._deceptionTags = value;
+  },
+});
 
 app.addHook('onRequest', async (request) => {
   request.captureStart = Date.now();

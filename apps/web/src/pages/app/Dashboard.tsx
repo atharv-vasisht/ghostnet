@@ -191,7 +191,7 @@ export default function Dashboard() {
           </div>
           <div className="lg:col-span-2">
             <RecentAlerts
-              alerts={alerts ?? []}
+              alerts={Array.isArray(alerts) ? alerts : []}
               isLoading={alertsLoading}
             />
           </div>
