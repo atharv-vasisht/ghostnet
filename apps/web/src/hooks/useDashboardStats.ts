@@ -82,8 +82,10 @@ export function useDashboardStats() {
         api.get<Alert[]>('/alerts'),
       ]);
 
-      const sessions = sessionsRes.data.sessions;
-      const alerts = alertsRes.data;
+      const sessions = Array.isArray(sessionsRes.data.sessions)
+        ? sessionsRes.data.sessions
+        : [];
+      const alerts = Array.isArray(alertsRes.data) ? alertsRes.data : [];
 
       const activeSessions = sessions.filter(
         (s) => s.status === 'ACTIVE'

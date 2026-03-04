@@ -18,7 +18,10 @@ export function useSessions(filters?: SessionFilters) {
         `${prefix}/sessions`,
         { params: filters }
       );
-      return data;
+      return {
+        ...data,
+        sessions: Array.isArray(data.sessions) ? data.sessions : [],
+      };
     },
   });
 }

@@ -229,6 +229,21 @@ export default async function authRoutes(
     return;
   });
 
+  /* ── GET /auth/reset-password/validate ── */
+  fastify.get('/reset-password/validate', async (request, reply) => {
+    const token = (request.query as { token?: string }).token;
+    if (!token) {
+      reply.code(400).send({ error: 'Missing token', valid: false });
+      return;
+    }
+    const valid = await validateResetToken(token);
+    if (!valid) {
+      reply.code(400).send({ error: 'Invalid or expired token', valid: false });
+      return;
+    }
+    return { valid: true };
+  });
+
   /* ── POST /auth/forgot-password ── */
   fastify.post('/forgot-password', async (request) => {
     const body = forgotPasswordSchema.parse(request.body);

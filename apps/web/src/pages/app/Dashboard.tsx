@@ -17,6 +17,7 @@ import { SessionTable } from '@/components/sessions/SessionTable';
 import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SkeletonCard } from '@/components/shared/SkeletonLoader';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { ErrorState } from '@/components/shared/ErrorState';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import type { Alert } from '@ghostnet/shared';
 
@@ -102,6 +103,8 @@ export default function Dashboard() {
   const {
     data: stats,
     isLoading: statsLoading,
+    isError: statsError,
+    refetch: refetchStats,
   } = useDashboardStats();
 
   const {
@@ -117,6 +120,17 @@ export default function Dashboard() {
     data: alerts,
     isLoading: alertsLoading,
   } = useAlerts();
+
+  if (statsError) {
+    return (
+      <div className="min-h-full bg-void p-6">
+        <ErrorState
+          message="Failed to load dashboard. The API may be unavailable."
+          onRetry={() => refetchStats()}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full bg-void p-6">

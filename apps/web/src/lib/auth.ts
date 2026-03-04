@@ -32,10 +32,11 @@ export const useAuthStore = create<AuthState>()(
         login: async (email, password) => {
           set({ isLoading: true });
           try {
-            const { data } = await api.post<AuthTokens>('/auth/login', {
-              email,
-              password,
-            });
+            const { data } = await api.post<AuthTokens>(
+              '/auth/login',
+              { email, password },
+              { baseURL: '' }
+            );
             set({
               accessToken: data.accessToken,
               isAuthenticated: true,
@@ -51,7 +52,8 @@ export const useAuthStore = create<AuthState>()(
           try {
             const { data } = await api.post<AuthTokens>(
               '/auth/signup',
-              signupData
+              signupData,
+              { baseURL: '' }
             );
             set({
               accessToken: data.accessToken,
@@ -65,7 +67,7 @@ export const useAuthStore = create<AuthState>()(
 
         logout: async () => {
           try {
-            await api.post('/auth/logout');
+            await api.post('/auth/logout', undefined, { baseURL: '' });
           } finally {
             set({
               user: null,
@@ -78,7 +80,11 @@ export const useAuthStore = create<AuthState>()(
 
         refresh: async () => {
           try {
-            const { data } = await api.post<AuthTokens>('/auth/refresh');
+            const { data } = await api.post<AuthTokens>(
+              '/auth/refresh',
+              undefined,
+              { baseURL: '' }
+            );
             set({
               accessToken: data.accessToken,
               isAuthenticated: true,
@@ -94,7 +100,9 @@ export const useAuthStore = create<AuthState>()(
 
         fetchMe: async () => {
           try {
-            const { data } = await api.get<User>('/auth/me');
+            const { data } = await api.get<User>('/auth/me', {
+              baseURL: '',
+            });
             set({ user: data, isAuthenticated: true });
           } catch {
             set({

@@ -1,7 +1,14 @@
+import { config as loadEnv } from 'dotenv';
+import { resolve } from 'node:path';
 import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { randomUUID } from 'node:crypto';
+
+// Ensure DATABASE_URL and other env vars are loaded both in dev (tsx)
+// and in production containers. In dev, cwd is apps/api, so go up two
+// levels to the repo root where .env lives.
+loadEnv({ path: resolve(process.cwd(), '../../.env') });
 
 export const prisma = new PrismaClient();
 

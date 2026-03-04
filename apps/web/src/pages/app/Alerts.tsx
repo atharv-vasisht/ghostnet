@@ -374,8 +374,11 @@ function RuleFormModal({
 // ─── Main Alerts Page ─────────────────────────────────────────────────
 
 export default function Alerts() {
-  const { data: alerts, isLoading: alertsLoading, isError: alertsError } = useAlerts();
-  const { data: rules, isLoading: rulesLoading } = useAlertRules();
+  const { data: alertsRaw, isLoading: alertsLoading, isError: alertsError } = useAlerts();
+  const { data: rulesRaw, isLoading: rulesLoading } = useAlertRules();
+
+  const alerts: Alert[] = Array.isArray(alertsRaw) ? alertsRaw : [];
+  const rules: AlertRule[] = Array.isArray(rulesRaw) ? rulesRaw : [];
 
   const acknowledgeMut = useAcknowledgeAlert();
   const createMut = useCreateAlertRule();
@@ -387,7 +390,7 @@ export default function Alerts() {
   const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AlertRule | null>(null);
 
-  const activeAlerts = (alerts ?? [])
+  const activeAlerts = alerts
     .filter((a) => !a.acknowledged)
     .sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()

@@ -8,6 +8,8 @@
     "build": "pnpm -r run build",
     "lint": "pnpm -r run lint",
     "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm --filter @ghostnet/api run test",
+    "test:e2e": "echo 'E2E: Add Playwright to apps/web for E2E tests'",
     "db:migrate": "pnpm --filter @ghostnet/api run db:migrate",
     "db:seed": "pnpm --filter @ghostnet/api run db:seed",
     "db:studio": "pnpm --filter @ghostnet/api run db:studio",
@@ -26,5 +28,8 @@
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "dotenv": "^17.3.1"
   }
 }

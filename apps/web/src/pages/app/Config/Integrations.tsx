@@ -246,7 +246,7 @@ export default function Integrations() {
       </p>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {(integrations ?? []).map((integration) => (
+        {(Array.isArray(integrations) ? integrations : []).map((integration) => (
           <IntegrationCard
             key={integration.id}
             integration={integration}

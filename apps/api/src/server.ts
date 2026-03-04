@@ -1,4 +1,6 @@
+import './config/env.js';
 import Fastify from 'fastify';
+import helmet from '@fastify/helmet';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
@@ -10,6 +12,7 @@ import eventRoutes from './routes/events.js';
 import alertRoutes from './routes/alerts.js';
 import configRoutes from './routes/config.js';
 import userRoutes from './routes/users.js';
+import teamRoutes from './routes/team.js';
 import orgRoutes from './routes/orgs.js';
 import reportRoutes from './routes/reports.js';
 import demoRoutes from './routes/demo.js';
@@ -25,10 +28,19 @@ const app = Fastify({
 
 /* ── Plugins ── */
 
+await app.register(helmet, {
+  contentSecurityPolicy: process.env.NODE_ENV === 'production',
+  crossOriginEmbedderPolicy: false, // Allow embedding for dashboards
+});
 await app.register(cookie);
+const corsOrigin =
+  process.env.NODE_ENV === 'production'
+    ? process.env.APP_URL ?? 'http://localhost:5173'
+    : process.env.APP_URL ?? 'http://localhost:5173';
 await app.register(cors, {
-  origin: process.env.APP_URL ?? 'http://localhost:5173',
+  origin: corsOrigin,
   credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
 });
 await app.register(rateLimit, {
   max: 100,
@@ -77,6 +89,39 @@ app.get('/health', async () => ({
   version: '1.0.0',
 }));
 
+app.get('/ready', async (request, reply) => {
+  const checks: Record<string, string> = {};
+
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    checks.database = 'ok';
+  } catch (err) {
+    request.log.error(err, 'DB health check failed');
+    checks.database = 'error';
+  }
+
+  try {
+    const Redis = (await import('ioredis')).default;
+    const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', {
+      maxRetriesPerRequest: 1,
+      connectTimeout: 3000,
+    });
+    await redis.ping();
+    redis.disconnect();
+    checks.redis = 'ok';
+  } catch (err) {
+    request.log.error(err, 'Redis health check failed');
+    checks.redis = 'error';
+  }
+
+  const allOk = Object.values(checks).every((v) => v === 'ok');
+  reply.code(allOk ? 200 : 503).send({
+    status: allOk ? 'ready' : 'degraded',
+    checks,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 /* ── Routes ── */
 
 await app.register(authRoutes, { prefix: '/auth' });
@@ -85,6 +130,7 @@ await app.register(eventRoutes, { prefix: '/api/events' });
 await app.register(alertRoutes, { prefix: '/api' });
 await app.register(configRoutes, { prefix: '/api/config' });
 await app.register(userRoutes, { prefix: '/api/users' });
+await app.register(teamRoutes, { prefix: '/api/team' });
 await app.register(orgRoutes, { prefix: '/api/org' });
 await app.register(reportRoutes, { prefix: '/api/reports' });
 await app.register(demoRoutes, { prefix: '/api/demo' });

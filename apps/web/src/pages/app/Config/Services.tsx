@@ -97,7 +97,7 @@ export default function Services() {
       </p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {(services ?? []).map((service) => {
+        {(Array.isArray(services) ? services : []).map((service) => {
           const meta = SERVICE_META[service.id];
           const Icon = meta?.icon ?? Globe;
           const enabled = service.enabled;

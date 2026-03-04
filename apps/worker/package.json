@@ -8,6 +8,7 @@
     "build": "prisma generate && tsc",
     "start": "node dist/worker.js",
     "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
     "db:generate": "prisma generate"
   },
   "prisma": {

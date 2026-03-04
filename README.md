@@ -35,6 +35,8 @@ Run the attack simulation to see GHOSTNET in action:
 ./scripts/simulate-agent.sh
 ```
 
+**Beta deployment:** See [docs/HOW_TO_DEPLOY.md](docs/HOW_TO_DEPLOY.md) for production deployment, [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) for release verification, and [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md) for running tests.
+
 ---
 
 ## Architecture

@@ -64,7 +64,7 @@ export default function Team() {
   const qc = useQueryClient();
   const currentUser = useAuthStore((s) => s.user);
 
-  const { data: members, isLoading: membersLoading, isError } = useQuery({
+  const { data: membersRaw, isLoading: membersLoading, isError } = useQuery({
     queryKey: ['team', 'members'],
     queryFn: async () => {
       const { data } = await api.get<TeamMember[]>('/team/members');
@@ -72,7 +72,7 @@ export default function Team() {
     },
   });
 
-  const { data: invites, isLoading: invitesLoading } = useQuery({
+  const { data: invitesRaw, isLoading: invitesLoading } = useQuery({
     queryKey: ['team', 'invites'],
     queryFn: async () => {
       const { data } = await api.get<PendingInvite[]>('/team/invites');
@@ -116,6 +116,9 @@ export default function Team() {
     },
   });
 
+  const members: TeamMember[] = Array.isArray(membersRaw) ? membersRaw : [];
+  const invites: PendingInvite[] = Array.isArray(invitesRaw) ? invitesRaw : [];
+
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<MemberRole>('analyst');
@@ -126,7 +129,7 @@ export default function Team() {
     [currentUser]
   );
 
-  const adminCount = (members ?? []).filter((m) => m.role === 'admin').length;
+  const adminCount = members.filter((m) => m.role === 'admin').length;
 
   const canChangeRole = (member: TeamMember) =>
     !isCurrentUser(member.id) && !(member.role === 'admin' && adminCount <= 1);

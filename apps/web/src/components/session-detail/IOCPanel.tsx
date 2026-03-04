@@ -24,7 +24,8 @@ function formatTag(tag: string): string {
 
 export function IOCPanel({ session, events, className }: IOCPanelProps) {
   const sourceIps = [...new Set([session.sourceIp, ...events.map((e) => e.sourceIp)])];
-  const userAgents = [...new Set([session.userAgent, ...events.map((e) => e.userAgent)])].filter(Boolean);
+  const userAgents = [...new Set([session.userAgent, ...events.map((e) => e.userAgent)])]
+    .filter((ua): ua is string => typeof ua === 'string' && ua.length > 0);
 
   const allTags = events.flatMap((e) => e.tags);
   const tagCounts = allTags.reduce<Record<string, number>>((acc, tag) => {
@@ -33,9 +34,10 @@ export function IOCPanel({ session, events, className }: IOCPanelProps) {
   }, {});
   const uniqueTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
 
-  const credentials = (session.believedAssets ?? []).filter(
-    (a) => a.type === 'credential'
-  );
+  const assets = Array.isArray(session.believedAssets)
+    ? session.believedAssets
+    : [];
+  const credentials = assets.filter((a) => a.type === 'credential');
 
   const handleExportIOCs = () => {
     const lines = [

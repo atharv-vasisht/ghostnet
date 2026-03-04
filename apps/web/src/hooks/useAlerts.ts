@@ -10,8 +10,11 @@ export function useAlerts() {
     queryKey: ['alerts', isDemo],
     queryFn: async () => {
       const endpoint = isDemo ? '/demo/alerts' : '/alerts';
-      const { data } = await api.get<Alert[]>(endpoint);
-      return data;
+      const { data } = await api.get<Alert[] | { alerts: Alert[] }>(endpoint);
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && Array.isArray((data as { alerts?: Alert[] }).alerts))
+        return (data as { alerts: Alert[] }).alerts;
+      return [];
     },
   });
 }
@@ -24,7 +27,7 @@ export function useAlertRules() {
     queryFn: async () => {
       const endpoint = isDemo ? '/demo/alerts/rules' : '/alerts/rules';
       const { data } = await api.get<AlertRule[]>(endpoint);
-      return data;
+      return Array.isArray(data) ? data : [];
     },
   });
 }

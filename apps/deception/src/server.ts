@@ -1,4 +1,4 @@
-import Fastify from 'fastify';
+import Fastify, { type FastifyRequest } from 'fastify';
 import winston from 'winston';
 import { generateDeceptionData } from './data/generator.js';
 import type { DeceptionDataConfig } from './data/generator.js';

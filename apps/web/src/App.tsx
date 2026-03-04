@@ -3,6 +3,7 @@ import { Suspense, lazy, type ReactNode } from 'react';
 import { useAuthStore } from '@/lib/auth';
 import { SkeletonLoader } from '@/components/shared/SkeletonLoader';
 import { AppShell } from '@/components/layout/AppShell';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 
 const Landing = lazy(() => import('@/pages/public/Landing'));
 const Demo = lazy(() => import('@/pages/public/Demo'));
@@ -20,6 +21,7 @@ const Alerts = lazy(() => import('@/pages/app/Alerts'));
 const Reports = lazy(() => import('@/pages/app/Reports'));
 const ConfigIndex = lazy(() => import('@/pages/app/Config'));
 const Team = lazy(() => import('@/pages/app/Team'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
 
 function PageFallback() {
   return (
@@ -88,8 +90,8 @@ export function App() {
           <Route path="team" element={<Team />} />
         </Route>
 
-        {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   );

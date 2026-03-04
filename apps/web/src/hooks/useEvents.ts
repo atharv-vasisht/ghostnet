@@ -19,7 +19,10 @@ export function useEvents(filters?: EventFilters) {
         `${prefix}/events`,
         { params: filters }
       );
-      return data;
+      return {
+        ...data,
+        events: Array.isArray(data.events) ? data.events : [],
+      };
     },
   });
 }
